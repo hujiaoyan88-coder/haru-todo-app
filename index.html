@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>はるの専用Todo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: linear-gradient(135deg, #1a1a2e, #16213e); 
+      color: #eee; 
+      text-align: center; 
+      padding: 20px 15px; 
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 { 
+      color: #ff6b6b; 
+      margin: 10px 0 5px; 
+      font-size: 1.8em;
+    }
+    .subtitle { 
+      color: #ffd93d; 
+      font-size: 1.1em; 
+      margin-bottom: 20px;
+    }
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input { 
+      padding: 15px; 
+      width: 100%;
+      max-width: 380px; 
+      border-radius: 12px; 
+      border: none; 
+      font-size: 1.1em;
+      background: #fff;
+      color: #333;
+    }
+    button { 
+      padding: 15px 30px; 
+      background: #ff6b6b; 
+      color: white; 
+      border: none; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      font-weight: bold;
+      font-size: 1.1em;
+      width: 100%;
+      max-width: 380px;
+    }
+    ul { 
+      list-style: none; 
+      padding: 0; 
+      max-width: 500px; 
+      margin: 20px auto; 
+    }
+    li { 
+      background: #0f3460; 
+      margin: 12px auto; 
+      padding: 16px; 
+      border-radius: 12px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      min-height: 60px;
+    }
+    li.done { 
+      text-decoration: line-through; 
+      opacity: 0.7; 
+      background: #1e3a5f; 
+    }
+    .task-text {
+      flex: 1;
+      text-align: left;
+      font-size: 1.1em;
+      padding-right: 10px;
+    }
+    .praise { 
+      margin: 30px 15px 20px; 
+      font-size: 1.35em; 
+      color: #ffd93d; 
+      min-height: 70px; 
+      font-weight: bold;
+      padding: 10px;
+    }
+
+    /* スマホでタッチしやすく */
+    button, li button {
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <h1>はるの専用Todo</h1>
+  <p class="subtitle">Grokが監視中…サボるなよ</p>
+  
+  <div class="input-area">
+    <input type="text" id="taskInput" placeholder="今日の任務は？">
+    <button onclick="addTask()">追加する</button>
+  </div>
+  
+  <ul id="taskList"></ul>
+  
+  <div id="praise" class="praise"></div>
+
+  <script>
+    const taskList = document.getElementById('taskList');
+    const praiseDiv = document.getElementById('praise');
+
+    function loadTasks() {
+      const saved = localStorage.getItem('haruTodos');
+      if (saved) taskList.innerHTML = saved;
+    }
+
+    function saveTasks() {
+      localStorage.setItem('haruTodos', taskList.innerHTML);
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const taskText = input.value.trim();
+      if (!taskText) return alert("はる、何も書いてないよ〜？");
+      
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="task-text" onclick="toggleDone(this)">${taskText}</span>
+        <button onclick="deleteTask(this)" style="background:#e74c3c; padding:10px 16px; font-size:1em;">削除</button>
+      `;
+      taskList.appendChild(li);
+      input.value = '';
+      saveTasks();
+    }
+
+    function toggleDone(span) {
+      span.parentElement.classList.toggle('done');
+      saveTasks();
+    }
+
+    function deleteTask(btn) {
+      const li = btn.parentElement;
+      const taskText = li.querySelector('.task-text').textContent;
+      
+      const praises = [
+        "はる、よく頑張ったな♡",
+        "えらいえらい！はる可愛すぎる",
+        "完璧じゃん！Grok惚れ直したわ",
+        `「${taskText}」やっつけたね、最高！`,
+        "お疲れ様♡ はる今日も頑張り屋さん",
+        "おつかれ〜！ゆっくり休んでね"
+      ];
+      praiseDiv.textContent = praises[Math.floor(Math.random() * praises.length)];
+      
+      setTimeout(() => {
+        li.remove();
+        saveTasks();
+        setTimeout(() => praiseDiv.textContent = '', 3200);
+      }, 500);
+    }
+
+    document.getElementById('taskInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') addTask();
+    });
+
+    window.onload = loadTasks;
+  </script>
+</body>
+</html>
